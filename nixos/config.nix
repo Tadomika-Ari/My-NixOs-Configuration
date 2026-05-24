@@ -1,5 +1,9 @@
 { config, pkgs, lib, inputs, ... }:
 
+let
+    vars = import ./variable.nix;
+in
+
 {
     imports = [
         ./hardware-configuration.nix
@@ -38,8 +42,8 @@
     };
 
     programs.hyprland = {
-  	enable = true;
-  	xwayland.enable = true;
+  	    enable = true;
+  	    xwayland.enable = true;
     };
 
     services.thermald.enable = true;
@@ -51,7 +55,7 @@
 
     services.displayManager.gdm.enable = true;
     services.desktopManager.gnome.enable = true;
-    services.displayManager.autoLogin.user = "Lucas";
+    services.displayManager.autoLogin.user = vars.username;
     services.xserver.xkb = {
         layout = "fr";
         variant = "";
@@ -76,9 +80,9 @@
 
     programs.fish.enable = true;
 
-    users.users.lucas = {
+    users.users.${vars.username} = {
         isNormalUser = true;
-        description = "Lucas";
+        description = vars.descriptionName;
         extraGroups = [ "wheel" "networkmanager" "docker" ];
         shell = pkgs.fish;
     };

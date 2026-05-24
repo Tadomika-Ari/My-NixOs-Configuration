@@ -1,3 +1,7 @@
+let
+    vars = import ./variable.nix;
+in
+
 {
     description = "NixOS config - Laptop";
 
@@ -29,7 +33,7 @@
                 home-manager.nixosModules.home-manager {
                     home-manager.useGlobalPkgs = true;
                     home-manager.useUserPackages = true;
-                    home-manager.users.lucas = import ./home.nix;
+                    home-manager.users.${vars.username} = import ./home.nix;
                     home-manager.extraSpecialArgs = { inherit zen-browser system inputs; };
                 }
             ];

@@ -1,7 +1,12 @@
 { config, pkgs, zen-browser, system, lib, inputs, ... }:
+
+let
+    vars = import ./variable.nix;
+in
+
 {
-    home.username = "lucas";
-    home.homeDirectory = "/home/lucas";
+    home.username = vars.username;
+    home.homeDirectory = vars.homeDir;
     home.stateVersion = "26.05";
 
     home.packages = (with pkgs; [
@@ -9,27 +14,26 @@
     	    postFixup = (old.postFixup or "") + ''
       	        wrapProgram $out/bin/code --add-flags "--password-store=basic"
     	    '';
-  	}))
-	kitty        
+  	    }))
+	    kitty        
         go
-	discord
-	spotify
-
+	    discord
+	    spotify
         rustup
-	eza
+	    eza
         fzf
         zoxide
         microfetch
     ]) ++ [
         zen-browser.packages.${system}.default
-	inputs.caelestia-shell.packages.${system}.with-cli
+	    inputs.caelestia-shell.packages.${system}.with-cli
     ];
 
     programs.git = {
         enable = true;
         settings = {
-            user.name = "Lucas";
-            user.email = "lucas1.eeckhoutte@epitech.eu";
+            user.name = vars.gitUser;
+            user.email = vars.gitEmail;
             init.defaultBranch = "main";
             pull.rebase = false;
         };
