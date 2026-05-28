@@ -7,6 +7,7 @@ in
 {
     imports = [
         ./hardware-configuration.nix
+	    inputs.silentSDDM.nixosModules.default
     ];
 
     nixpkgs.config.allowUnfree = true;
@@ -16,6 +17,14 @@ in
     boot.loader.systemd-boot.configurationLimit = 2;
     boot.kernelPackages = pkgs.linuxPackages;
 
+    boot.plymouth = {
+	    enable = true;
+	    theme = "spinner";
+    };
+    boot.kernelParams = [ "quiet" "splash" ];
+
+    services.displayManager.sddm.settings.General.DisplayStopDelay = 5000;
+
     networking.hostName = "nixos";
     networking.networkmanager.enable = true;
 
@@ -24,11 +33,34 @@ in
 
     services.fprintd.enable = true;
 
+    # /etc/nixos/configuration.nix
+    nix.settings.trusted-users = [ "root" "@wheel" ];
+
     security.pam.services = {
         login.fprintAuth = lib.mkForce true;
         sudo.fprintAuth = false;
         polkit-1.fprintAuth = true;
         gdm-fingerprint.fprintAuth = true;
+    };
+
+    services.displayManager.sddm = {
+        enable = true;
+        wayland.enable = true;
+        wayland.compositor = "kwin";
+        settings = {
+            Theme = {
+                CursorTheme = "Adwaita";
+                CursorSize = 24;
+            };
+            General.GreeterEnvironment = lib.mkForce "QML2_IMPORT_PATH=/run/current-system/sw/share/sddm/themes/silent/components/,QT_IM_MODULE=qtvirtualkeyboard,XCURSOR_THEME=Adwaita,XCURSOR_SIZE=24,QT_MEDIA_BACKEND=ffmpeg";
+        };
+    };    
+
+    # Configure SilentSDDM
+    programs.silentSDDM = {
+        enable = true;
+        theme = "rei";         # rei | default | ken | silvia | everforest | catppuccin-mocha | nord | ...
+    # settings = { };      # options avancées (voir plus bas)
     };
 
     hardware.graphics = {
@@ -53,7 +85,7 @@ in
     i18n.defaultLocale = "fr_FR.UTF-8";
     console.keyMap = "fr";
 
-    services.displayManager.gdm.enable = true;
+    services.displayManager.gdm.enable = false;
     services.desktopManager.gnome.enable = true;
     services.displayManager.autoLogin.user = vars.username;
     services.xserver.xkb = {
@@ -102,12 +134,16 @@ in
         htop
         python3
 
+	    gcc
         llvmPackages_20.clang
         llvmPackages_20.llvm
         gcovr
         criterion
         valgrind
         gnumake42
+	    devenv
+	    ollama
+	    mpv
     ];
 
     virtualisation.docker.enable = true;
